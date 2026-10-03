@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>sketch local</title>
-<script src="/static/mermaid.min.js"></script>
+<script src="static/mermaid.min.js"></script>
 <style>
   :root{--bg:#fafaf8;--fg:#1f1f1f;--muted:#777;--line:#ddd;--acc:#2f6fed;--panel:#fff}
   body{font:15px/1.6 -apple-system,"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:14px;height:100vh;box-sizing:border-box;display:flex;flex-direction:column}
@@ -80,12 +80,12 @@ const $ = id => document.getElementById(id);
 let imageB64 = '', reading = null, mode = '', answers = {}, lastSvg = '', messages = [], insightTxt = '', repairing = false, runId = null;
 mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });
 
-fetch('/api/models').then(r => r.json()).then(j => {
+fetch('api/models').then(r => r.json()).then(j => {
   const opt = (sel, def) => j.models.map(m => `<option ${m === def ? 'selected' : ''}>${m}</option>`).join('');
   $('model').innerHTML = opt('model', j.text); $('vmodel').innerHTML = opt('vmodel', j.vision);
   if (!j.models.some(m => /vl|vision|llava|gemma3(?!:1b)|minicpm-v/i.test(m))) $('status').textContent = '주의: 비전 모델이 안 보입니다 (예: ollama pull qwen2.5vl:7b)';
 }).catch(() => $('status').textContent = 'LLM 서버에 연결할 수 없습니다');
-fetch('/api/presets').then(r => r.json()).then(j => {
+fetch('api/presets').then(r => r.json()).then(j => {
   $('style').innerHTML = Object.entries(j.styles).map(([k, v]) => `<option value="${k}" title="${v}">${k}</option>`).join('');
   $('type').innerHTML = Object.entries(j.types).map(([k, v]) => `<option value="${k}" title="${v}">${k}</option>`).join('');
 });
@@ -105,7 +105,7 @@ $('file').onchange = () => {
 $('read').onclick = async () => {
   $('read').disabled = true; $('status').textContent = '비전 모델이 읽는 중… (수십 초)';
   try {
-    const r = await fetch('/api/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image_b64: imageB64, vision_model: $('vmodel').value }) }).then(r => r.json());
+    const r = await fetch('api/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image_b64: imageB64, vision_model: $('vmodel').value }) }).then(r => r.json());
     if (r.error) throw new Error(r.error);
     reading = r.reading; showReading(); $('status').textContent = `읽음: 요소 ${reading.elements.length}, 연결 ${reading.edges.length}`;
     say('assistant', `사진을 읽었습니다. 요소 ${reading.elements.length}개, 연결 ${reading.edges.length}개` + (reading.confidence_notes.length ? `\n불확실: ${esc(reading.confidence_notes.join(' / '))}` : '') + '\n왼쪽에서 틀린 글자를 고치고 "확인"을 누르세요.');
@@ -134,7 +134,7 @@ $('confirm').onclick = () => {
     .forEach(([k, t, s]) => { const b = document.createElement('button'); b.className = 'mode'; b.innerHTML = `<b>${t}</b><small>${s}</small>`; b.onclick = () => { opts.querySelectorAll('button').forEach(x => x.disabled = true); mode = k; say('user', t); plan(); }; opts.appendChild(b); });
 };
 async function plan(ans) {
-  const r = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reading, mode, answers: ans || null }) }).then(r => r.json());
+  const r = await fetch('api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reading, mode, answers: ans || null }) }).then(r => r.json());
   reading = r.reading; showReading();
   if (r.questions.length) {
     const d = say('assistant', '몇 가지만 확인할게요.<div class="qs"></div><div class="opts"><button class="primary">답변 적용</button></div>');
@@ -152,7 +152,7 @@ async function plan(ans) {
 async function callDraw(extraMsgs) {
   $('draw').disabled = true; $('refine').disabled = true; $('err').textContent = ''; $('status').textContent = '그리는 중…'; const out = say('assistant', ''); const t0 = Date.now();
   try {
-    const r = await fetch('/api/draw', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    const r = await fetch('api/draw', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reading, mode, style: $('style').value, type: $('type').value, max_nodes: +$('maxn').value || 8, messages: extraMsgs || null, model: $('model').value }) });
     const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '';
     while (true) {
@@ -186,7 +186,7 @@ async function render(src, allowRepair = true) {
     const msg = (e && e.message) || String(e); $('err').textContent = '파싱 오류: ' + msg;
     if (allowRepair && !repairing) {
       repairing = true; $('status').textContent = '파싱 오류 → LLM 자동 수정 1회';
-      try { const r = await fetch('/api/repair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: src, error: msg, model: $('model').value }) }).then(r => r.json());
+      try { const r = await fetch('api/repair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: src, error: msg, model: $('model').value }) }).then(r => r.json());
         if (r.source) { $('src').value = r.source; await render(r.source, false); $('status').textContent = $('err').textContent ? '자동 수정 실패 — 소스를 직접 고치세요' : '자동 수정됨'; } }
       finally { repairing = false; }
     }
@@ -205,18 +205,18 @@ $('dlpng').onclick = () => {
 };
 $('copy').onclick = () => navigator.clipboard.writeText($('src').value);
 $('btikz').onclick = async () => { if (!$('src').value) return; $('status').textContent = 'TikZ 변환 중…'; $('tikz').hidden = false;
-  const r = await fetch('/api/tikz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: $('src').value, reading, model: $('model').value }) }).then(r => r.json());
+  const r = await fetch('api/tikz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: $('src').value, reading, model: $('model').value }) }).then(r => r.json());
   $('tikz').value = r.tikz || r.error; $('status').textContent = 'TikZ 완료'; };
 $('save').onclick = async () => { if (!reading) return;
-  const r = await fetch('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: runId, image_b64: imageB64, reading, mode, style: $('style').value, type: $('type').value, source: $('src').value, insight: insightTxt, messages, tikz: $('tikz').value }) }).then(r => r.json());
+  const r = await fetch('api/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: runId, image_b64: imageB64, reading, mode, style: $('style').value, type: $('type').value, source: $('src').value, insight: insightTxt, messages, tikz: $('tikz').value }) }).then(r => r.json());
   runId = r.id; $('status').textContent = '저장: ' + r.id; loadRuns(); };
 $('new').onclick = () => { imageB64 = ''; reading = null; mode = ''; messages = []; runId = null; $('img').hidden = true; $('reading').hidden = true; $('chat').innerHTML = ''; $('src').value = ''; $('view').innerHTML = ''; $('insight').hidden = true; $('tikz').hidden = true; $('draw').disabled = true; $('refine').disabled = true; };
 async function loadRuns() {
-  const rs = await fetch('/api/runs').then(r => r.json());
+  const rs = await fetch('api/runs').then(r => r.json());
   $('runs').innerHTML = rs.map(r => `<li data-id="${r.id}">${r.ts} · ${r.mode || ''} · ${r.style || ''} · ${esc(r.head || '')}</li>`).join('') || '<li>없음</li>';
   $('runs').querySelectorAll('li[data-id]').forEach(li => li.onclick = async () => {
-    const j = await fetch('/api/runs/' + li.dataset.id).then(r => r.json()); runId = j.id; reading = j.reading; mode = j.mode; messages = j.messages || []; insightTxt = j.insight || '';
-    $('img').src = '/api/runs/' + j.id + '/sketch.png'; $('img').hidden = false; showReading(); $('style').value = j.style; $('type').value = j.type; $('src').value = j.source || ''; $('insight').hidden = !insightTxt; $('insight').textContent = insightTxt;
+    const j = await fetch('api/runs/' + li.dataset.id).then(r => r.json()); runId = j.id; reading = j.reading; mode = j.mode; messages = j.messages || []; insightTxt = j.insight || '';
+    $('img').src = 'api/runs/' + j.id + '/sketch.png'; $('img').hidden = false; showReading(); $('style').value = j.style; $('type').value = j.type; $('src').value = j.source || ''; $('insight').hidden = !insightTxt; $('insight').textContent = insightTxt;
     $('chat').innerHTML = ''; say('assistant', '이전 작업을 불러왔습니다. 다듬기 요청을 이어서 할 수 있습니다.'); $('draw').disabled = false; $('refine').disabled = false; render($('src').value, false);
   });
 }
