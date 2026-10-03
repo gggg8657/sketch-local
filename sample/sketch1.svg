@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<rect width="1200" height="800" fill="#fbf8f0"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 사용자 (stick figure) -->
+  <circle cx="110" cy="330" r="22"/>
+  <path d="M110 352 Q112 400 108 430 M108 385 L70 410 M109 383 L150 405 M108 430 L80 480 M108 430 L140 478"/>
+  <!-- 웹 서버 box -->
+  <path d="M300 300 Q420 292 520 300 Q524 360 518 400 Q410 406 302 398 Q296 350 300 300 Z"/>
+  <!-- API 서버 box -->
+  <path d="M660 300 Q780 296 880 302 Q884 358 878 398 Q770 404 662 396 Q656 350 660 300 Z"/>
+  <!-- DB cylinder -->
+  <ellipse cx="1030" cy="310" rx="70" ry="18"/>
+  <path d="M960 310 Q958 370 962 420 Q1030 440 1098 420 Q1102 370 1100 310"/>
+  <!-- 캐시 (dashed, uncertain) -->
+  <path d="M700 520 Q800 514 860 522 Q864 580 858 610 Q780 616 702 608 Q696 560 700 520 Z" stroke-dasharray="9 7"/>
+  <!-- arrows -->
+  <path d="M160 360 Q230 340 290 348 M272 338 L292 348 L274 360"/>
+  <path d="M525 350 Q590 344 652 350 M636 340 L656 350 L636 362"/>
+  <path d="M884 350 Q920 348 955 352 M940 342 L958 352 L940 364"/>
+  <path d="M770 406 Q772 460 775 512"/>
+  <!-- 큰 그룹 묶음 (backend) -->
+  <path d="M630 250 Q900 240 1130 252 Q1136 460 1128 650 Q880 660 632 650 Q624 450 630 250 Z" stroke-dasharray="14 10" stroke-width="2.5" stroke="#555"/>
+</g>
+<g font-family="Bradley Hand, Chalkboard SE, Marker Felt, cursive" fill="#1b1b1b" font-size="34">
+  <text x="60" y="520">사용자</text>
+  <text x="340" y="360">웹 서버</text>
+  <text x="700" y="360">API 서버</text>
+  <text x="992" y="380">DB</text>
+  <text x="730" y="575">캐시?</text>
+  <text x="660" y="700" font-size="30" fill="#444">백엔드 (내부망)</text>
+  <text x="180" y="320" font-size="24">HTTP</text>
+  <text x="555" y="330" font-size="24">REST</text>
+  <text x="60" y="120" font-size="40">문서 조회 시스템 구상</text>
+  <text x="60" y="170" font-size="24" fill="#555">* 캐시는 나중에 붙일지 미정</text>
+</g>
+</svg>
