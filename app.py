@@ -121,6 +121,9 @@ def read(p):
         return f.read()
 
 
+GOAL = read(os.path.join(ROOT, "goal-prompt.md"))  # 요청마다 다시 읽지 않음
+
+
 def write(p, s):
     with open(p, "w", encoding="utf-8") as f:
         f.write(s)
@@ -206,7 +209,7 @@ def models():
 
 def prompt(section):
     """goal-prompt.md 의 `## <section>` 본문."""
-    txt = read(os.path.join(ROOT, "goal-prompt.md"))
+    txt = GOAL
     m = re.search(rf"^## {re.escape(section)}\s*$(.*?)(?=^## |\Z)", txt, re.M | re.S)
     if not m:
         raise KeyError(section)
@@ -392,8 +395,13 @@ def tikz(src, reading, model=MODEL):
 
 
 # ── 저장 ────────────────────────────────────────────────────────────────
+RUN_RE = r"\d{4}-\d{2}-\d{2}-[0-9a-f]{4}"
+
+
 def save(bundle):
-    rid = bundle.get("id") or f"{datetime.date.today()}-{secrets.token_hex(2)}"
+    rid = bundle.get("id")
+    if not (rid and re.fullmatch(RUN_RE, rid)):  # 클라이언트가 준 id 는 형식 검증 (경로 탈출 방지)
+        rid = f"{datetime.date.today()}-{secrets.token_hex(2)}"
     d = os.path.join(WS, rid)
     os.makedirs(d, exist_ok=True)
     img = bundle.pop("image_b64", None)
@@ -417,7 +425,7 @@ def list_runs():
             try:
                 j = json.load(open(p, encoding="utf-8"))
                 out.append({"id": j["id"], "ts": j.get("ts"), "mode": j.get("mode"), "style": j.get("style"), "type": j.get("type"),
-                            "head": (j.get("reading") or {}).get("elements", [{}])[:3] and ", ".join(e["label"] for e in j["reading"]["elements"][:3])})
+                            "head": (j.get("reading") or {}).get("elements", [{}])[:3] and ", ".join(e.get("label", "") for e in j["reading"]["elements"][:3])})
             except Exception:
                 pass
     return out
@@ -425,7 +433,6 @@ def list_runs():
 
 # ── HTTP ───────────────────────────────────────────────────────────────
 HTML = read(os.path.join(ROOT, "ui.html")) if os.path.exists(os.path.join(ROOT, "ui.html")) else "ui.html 없음"
-RUN_RE = r"\d{4}-\d{2}-\d{2}-[0-9a-f]{4}"
 
 
 class H(BaseHTTPRequestHandler):
@@ -458,7 +465,7 @@ class H(BaseHTTPRequestHandler):
             if self.path == "/static/mermaid.min.js":
                 with open(os.path.join(ROOT, "static", "mermaid.min.js"), "rb") as f:
                     return self._send(f.read(), "application/javascript")
-            self._send(HTML.replace("%MODEL%", json.dumps(MODEL)).replace("%VISION%", json.dumps(VISION)).encode(), "text/html; charset=utf-8")
+            self._send(HTML.encode(), "text/html; charset=utf-8")
         except FileNotFoundError:
             self._send({"error": "없음"}, code=404)
         except Exception as e:
