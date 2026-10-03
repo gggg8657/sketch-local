@@ -1,0 +1,225 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sketch local</title>
+<script src="/static/mermaid.min.js"></script>
+<style>
+  :root{--bg:#fafaf8;--fg:#1f1f1f;--muted:#777;--line:#ddd;--acc:#2f6fed;--panel:#fff}
+  body{font:15px/1.6 -apple-system,"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:14px;height:100vh;box-sizing:border-box;display:flex;flex-direction:column}
+  h1{font-size:18px;margin:0 0 8px}h1 small{font-weight:400;color:var(--muted);font-size:13px}
+  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  select,button,textarea,input[type=text]{font:inherit;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
+  button{cursor:pointer}button.primary{background:var(--acc);color:#fff;border-color:var(--acc)}button:disabled{opacity:.5}
+  button.mode{padding:8px 12px;text-align:left}button.mode b{display:block}button.mode small{color:var(--muted)}
+  #status{color:var(--muted);font-size:13px}
+  .main{display:flex;gap:12px;flex:1;min-height:0}
+  .col{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .c1{width:300px}.c2{width:380px}.c3{flex:1}
+  .box{border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:10px;overflow:auto}
+  #img{max-width:100%;max-height:260px;display:block;margin:auto}
+  #chat{flex:1;font-size:14px}
+  .msg{margin:6px 0;padding:8px 10px;border-radius:8px;white-space:pre-wrap}.msg.user{background:#e7efff}.msg.assistant{background:#f1f1ee}
+  .msg .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}.msg .q{margin:6px 0}.msg .q input,.msg .q select{width:100%;box-sizing:border-box}
+  #view{flex:1;display:flex;align-items:flex-start;justify-content:center}#view svg{max-width:100%;height:auto}
+  textarea{resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+  #elems,#edges{height:110px;width:100%;box-sizing:border-box}#q{height:60px;width:100%;box-sizing:border-box;font-family:inherit;font-size:14px}
+  #src{height:140px}#tikz{height:120px}
+  #err{color:#a33;font-size:13px;white-space:pre-wrap}
+  .lbl{font-size:12px;color:var(--muted)}
+  details{font-size:13px}#runs li{cursor:pointer;list-style:none;padding:2px 0}#runs li:hover{color:var(--acc)}
+  @media (max-width:1000px){.main{flex-direction:column}.c1,.c2{width:auto}}
+</style>
+
+<h1>sketch local <small>— 손그림 사진 → 읽기 → 대화로 방향 정하기 → 논문/그래픽 스타일 다이어그램 · 로컬 비전+텍스트 LLM</small></h1>
+<div class="bar">
+  <label>비전 <select id="vmodel"></select></label>
+  <label>텍스트 <select id="model"></select></label>
+  <button id="dlsvg">SVG</button><button id="dlpng">PNG</button><button id="copy">Mermaid 복사</button><button id="btikz">TikZ</button><button id="save">번들 저장</button>
+  <button id="new">새로</button>
+  <span id="status"></span>
+</div>
+<div class="main">
+  <div class="col c1">
+    <div class="box">
+      <input type="file" id="file" accept="image/*">
+      <img id="img" hidden>
+      <div class="bar" style="margin-top:8px"><button id="read" class="primary" disabled>1. 읽기</button><span class="lbl">사진·스캔 (1600px 로 축소 전송)</span></div>
+    </div>
+    <div class="box" id="reading" hidden>
+      <div class="lbl">읽은 내용 확인 — 틀린 글자·종류는 여기서 고치세요. 한 줄 = <code>id: 라벨 [종류] (?)</code></div>
+      <textarea id="elems"></textarea>
+      <div class="lbl">연결 — 한 줄 = <code>n1 -> n2 : 라벨 (?)</code> · 방향 -> &lt;- &lt;-> -- ?</div>
+      <textarea id="edges"></textarea>
+      <div class="lbl" id="notes"></div>
+      <div class="bar"><button id="confirm" class="primary">2. 확인 → 방향 정하기</button></div>
+    </div>
+    <details><summary>이전 작업</summary><ul id="runs"></ul></details>
+  </div>
+  <div class="col c2">
+    <div class="box" id="chat"></div>
+    <textarea id="q" placeholder="그린 뒤 다듬기 요청 (예: 라벨 영어로, DB 를 원통으로, 색 더 연하게)"></textarea>
+    <div class="bar"><button id="refine" disabled>다듬기</button><span class="lbl">⌘/Ctrl+Enter</span></div>
+  </div>
+  <div class="col c3">
+    <div class="bar">
+      <label>스타일 <select id="style"></select></label>
+      <label>유형 <select id="type"></select></label>
+      <label>단순화 노드 수 <input type="text" id="maxn" value="8" size="2"></label>
+      <button id="draw" class="primary" disabled>4. 그리기</button>
+    </div>
+    <div class="box" id="view"><span class="lbl">여기에 다이어그램</span></div>
+    <div id="err"></div>
+    <div id="insight" class="box" hidden></div>
+    <textarea id="src" placeholder="Mermaid 소스 (직접 고치면 바로 다시 그림)"></textarea>
+    <textarea id="tikz" placeholder="TikZ (버튼을 누르면 생성)" hidden></textarea>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const TEXT_DEFAULT = %MODEL%, VISION_DEFAULT = %VISION%;
+let imageB64 = '', reading = null, mode = '', answers = {}, lastSvg = '', messages = [], insightTxt = '', repairing = false, runId = null;
+mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });
+
+fetch('/api/models').then(r => r.json()).then(j => {
+  const opt = (sel, def) => j.models.map(m => `<option ${m === def ? 'selected' : ''}>${m}</option>`).join('');
+  $('model').innerHTML = opt('model', j.text); $('vmodel').innerHTML = opt('vmodel', j.vision);
+  if (!j.models.some(m => /vl|vision|llava|gemma3(?!:1b)|minicpm-v/i.test(m))) $('status').textContent = '주의: 비전 모델이 안 보입니다 (예: ollama pull qwen2.5vl:7b)';
+}).catch(() => $('status').textContent = 'LLM 서버에 연결할 수 없습니다');
+fetch('/api/presets').then(r => r.json()).then(j => {
+  $('style').innerHTML = Object.entries(j.styles).map(([k, v]) => `<option value="${k}" title="${v}">${k}</option>`).join('');
+  $('type').innerHTML = Object.entries(j.types).map(([k, v]) => `<option value="${k}" title="${v}">${k}</option>`).join('');
+});
+
+function say(role, html) { const d = document.createElement('div'); d.className = 'msg ' + role; d.innerHTML = html; $('chat').appendChild(d); $('chat').scrollTop = 1e9; return d; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// 1) 이미지 → 1600px 축소 → base64
+$('file').onchange = () => {
+  const f = $('file').files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => {
+    const s = Math.min(1, 1600 / Math.max(img.width, img.height)); const c = document.createElement('canvas');
+    c.width = img.width * s; c.height = img.height * s; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    imageB64 = c.toDataURL('image/png').split(',')[1]; $('img').src = c.toDataURL('image/png'); $('img').hidden = false; $('read').disabled = false;
+  }; img.src = URL.createObjectURL(f);
+};
+$('read').onclick = async () => {
+  $('read').disabled = true; $('status').textContent = '비전 모델이 읽는 중… (수십 초)';
+  try {
+    const r = await fetch('/api/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image_b64: imageB64, vision_model: $('vmodel').value }) }).then(r => r.json());
+    if (r.error) throw new Error(r.error);
+    reading = r.reading; showReading(); $('status').textContent = `읽음: 요소 ${reading.elements.length}, 연결 ${reading.edges.length}`;
+    say('assistant', `사진을 읽었습니다. 요소 ${reading.elements.length}개, 연결 ${reading.edges.length}개` + (reading.confidence_notes.length ? `\n불확실: ${esc(reading.confidence_notes.join(' / '))}` : '') + '\n왼쪽에서 틀린 글자를 고치고 "확인"을 누르세요.');
+  } catch (e) { $('status').textContent = '읽기 오류: ' + e.message; }
+  $('read').disabled = false;
+};
+function showReading() {
+  $('reading').hidden = false;
+  $('elems').value = reading.elements.map(e => `${e.id}: ${e.label} [${e.kind}]${e.uncertain ? ' (?)' : ''}`).join('\n');
+  $('edges').value = reading.edges.map(e => `${e.from} ${e.direction} ${e.to}${e.label ? ' : ' + e.label : ''}${e.uncertain ? ' (?)' : ''}`).join('\n');
+  $('notes').textContent = (reading.groups.length ? '그룹: ' + reading.groups.map(g => `${g.label}{${g.members.join(',')}}`).join(' ') + ' · ' : '') + (reading.handwriting_notes.length ? '메모: ' + reading.handwriting_notes.join(' / ') : '');
+}
+function parseReading() {
+  const els = [], eds = [];
+  for (const l of $('elems').value.split('\n')) { const m = l.match(/^\s*(\w+)\s*:\s*(.*?)\s*(?:\[(\w+)\])?\s*(\(\?\))?\s*$/); if (m && m[2]) els.push({ id: m[1], label: m[2], kind: m[3] || 'box', uncertain: !!m[4] }); }
+  for (const l of $('edges').value.split('\n')) { const m = l.match(/^\s*(\w+)\s*(->|<->|<-|--|\?)\s*(\w+)\s*(?::\s*(.*?))?\s*(\(\?\))?\s*$/); if (m) eds.push({ from: m[1], to: m[3], direction: m[2], label: (m[4] || '').trim(), uncertain: !!m[5] || m[2] === '?' }); }
+  return { ...reading, elements: els, edges: eds };
+}
+
+// 2) 확인 → 3) 모드 → 질문 → 추천
+$('confirm').onclick = () => {
+  reading = parseReading(); answers = {};
+  const d = say('assistant', '어떻게 그릴까요?<div class="opts"></div>');
+  const opts = d.querySelector('.opts');
+  [['원본', '원본 그대로 재현', '요소·연결을 그대로, 글씨와 모양만 정돈'], ['단순화', '단순화', '핵심만 남겨 노드 수를 줄임'], ['인사이트', '인사이트 재구성', '그림의 의도를 해석해 더 읽기 좋은 구조로 재배치 + 해설']]
+    .forEach(([k, t, s]) => { const b = document.createElement('button'); b.className = 'mode'; b.innerHTML = `<b>${t}</b><small>${s}</small>`; b.onclick = () => { opts.querySelectorAll('button').forEach(x => x.disabled = true); mode = k; say('user', t); plan(); }; opts.appendChild(b); });
+};
+async function plan(ans) {
+  const r = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reading, mode, answers: ans || null }) }).then(r => r.json());
+  reading = r.reading; showReading();
+  if (r.questions.length) {
+    const d = say('assistant', '몇 가지만 확인할게요.<div class="qs"></div><div class="opts"><button class="primary">답변 적용</button></div>');
+    const qs = d.querySelector('.qs');
+    r.questions.forEach(q => { const w = document.createElement('div'); w.className = 'q';
+      w.innerHTML = `<div>${esc(q.q)}</div>` + (q.options ? `<select data-k="${q.key}">${q.options.map(o => `<option ${o === q.default ? 'selected' : ''}>${o}</option>`).join('')}</select>` : `<input type="text" data-k="${q.key}" value="${esc(q.default)}">`); qs.appendChild(w); });
+    d.querySelector('button').onclick = () => { const a = {}; qs.querySelectorAll('[data-k]').forEach(i => a[i.dataset.k] = i.value); d.querySelector('button').disabled = true; say('user', Object.values(a).join(' / ')); plan(a); };
+    return;
+  }
+  $('style').value = r.recommend.style; $('type').value = r.recommend.type; $('draw').disabled = false;
+  say('assistant', `추천: 스타일 <b>${r.recommend.style}</b> · 유형 <b>${r.recommend.type}</b>\n${esc(r.recommend.why)}\n오른쪽에서 바꿔도 됩니다. "4. 그리기"를 누르세요.`);
+}
+
+// 4) 그리기 / 다듬기 (SSE)
+async function callDraw(extraMsgs) {
+  $('draw').disabled = true; $('refine').disabled = true; $('err').textContent = ''; $('status').textContent = '그리는 중…'; const out = say('assistant', ''); const t0 = Date.now();
+  try {
+    const r = await fetch('/api/draw', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reading, mode, style: $('style').value, type: $('type').value, max_nodes: +$('maxn').value || 8, messages: extraMsgs || null, model: $('model').value }) });
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = '';
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i; while ((i = buf.indexOf('\n\n')) >= 0) {
+        const line = buf.slice(0, i); buf = buf.slice(i + 2);
+        if (!line.startsWith('data: ')) continue;
+        const ev = JSON.parse(line.slice(6));
+        if (ev.token) { out.textContent += ev.token; $('chat').scrollTop = 1e9; }
+        if (ev.error) throw new Error(ev.error);
+        if (ev.done) { out.textContent = '그렸습니다.' + (ev.done.sanity ? ' (검사: ' + ev.done.sanity + ')' : ''); $('src').value = ev.done.source; insightTxt = ev.done.insight || ''; $('insight').hidden = !insightTxt; $('insight').textContent = insightTxt; await render(ev.done.source); }
+      }
+    }
+    $('status').textContent = `완료 ${((Date.now() - t0) / 1000).toFixed(0)}초`;
+  } catch (e) { $('status').textContent = '오류: ' + e.message; }
+  $('draw').disabled = false; $('refine').disabled = false;
+}
+$('draw').onclick = () => { messages = []; callDraw(); };
+$('refine').onclick = () => {
+  const t = $('q').value.trim(); if (!t || !$('src').value) return;
+  messages.push({ role: 'assistant', content: $('src').value.replace(/^---[\s\S]*?---\n/, '') }, { role: 'user', content: `[현재 소스]\n${$('src').value.replace(/^---[\s\S]*?---\n/, '')}\n\n[요청]\n${t}` });
+  say('user', t); $('q').value = ''; callDraw(messages);
+};
+$('q').addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') $('refine').click(); });
+
+async function render(src, allowRepair = true) {
+  $('err').textContent = ''; if (!src.trim()) return;
+  try { const { svg } = await mermaid.render('m' + Date.now(), src); $('view').innerHTML = svg; lastSvg = svg; }
+  catch (e) {
+    const msg = (e && e.message) || String(e); $('err').textContent = '파싱 오류: ' + msg;
+    if (allowRepair && !repairing) {
+      repairing = true; $('status').textContent = '파싱 오류 → LLM 자동 수정 1회';
+      try { const r = await fetch('/api/repair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: src, error: msg, model: $('model').value }) }).then(r => r.json());
+        if (r.source) { $('src').value = r.source; await render(r.source, false); $('status').textContent = $('err').textContent ? '자동 수정 실패 — 소스를 직접 고치세요' : '자동 수정됨'; } }
+      finally { repairing = false; }
+    }
+  }
+}
+$('src').addEventListener('input', () => render($('src').value, false));
+
+// 내보내기
+function dl(name, blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); }
+$('dlsvg').onclick = () => lastSvg && dl('diagram.svg', new Blob([lastSvg], { type: 'image/svg+xml' }));
+$('dlpng').onclick = () => {
+  if (!lastSvg) return; const svgEl = $('view').querySelector('svg'); const w = svgEl.viewBox.baseVal.width || svgEl.clientWidth, h = svgEl.viewBox.baseVal.height || svgEl.clientHeight;
+  const img = new Image(); const c = document.createElement('canvas'); c.width = w * 2; c.height = h * 2;
+  img.onload = () => { const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height); c.toBlob(b => dl('diagram.png', b)); };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(lastSvg.replace('<svg', `<svg width="${w}" height="${h}"`));
+};
+$('copy').onclick = () => navigator.clipboard.writeText($('src').value);
+$('btikz').onclick = async () => { if (!$('src').value) return; $('status').textContent = 'TikZ 변환 중…'; $('tikz').hidden = false;
+  const r = await fetch('/api/tikz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: $('src').value, reading, model: $('model').value }) }).then(r => r.json());
+  $('tikz').value = r.tikz || r.error; $('status').textContent = 'TikZ 완료'; };
+$('save').onclick = async () => { if (!reading) return;
+  const r = await fetch('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: runId, image_b64: imageB64, reading, mode, style: $('style').value, type: $('type').value, source: $('src').value, insight: insightTxt, messages, tikz: $('tikz').value }) }).then(r => r.json());
+  runId = r.id; $('status').textContent = '저장: ' + r.id; loadRuns(); };
+$('new').onclick = () => { imageB64 = ''; reading = null; mode = ''; messages = []; runId = null; $('img').hidden = true; $('reading').hidden = true; $('chat').innerHTML = ''; $('src').value = ''; $('view').innerHTML = ''; $('insight').hidden = true; $('tikz').hidden = true; $('draw').disabled = true; $('refine').disabled = true; };
+async function loadRuns() {
+  const rs = await fetch('/api/runs').then(r => r.json());
+  $('runs').innerHTML = rs.map(r => `<li data-id="${r.id}">${r.ts} · ${r.mode || ''} · ${r.style || ''} · ${esc(r.head || '')}</li>`).join('') || '<li>없음</li>';
+  $('runs').querySelectorAll('li[data-id]').forEach(li => li.onclick = async () => {
+    const j = await fetch('/api/runs/' + li.dataset.id).then(r => r.json()); runId = j.id; reading = j.reading; mode = j.mode; messages = j.messages || []; insightTxt = j.insight || '';
+    $('img').src = '/api/runs/' + j.id + '/sketch.png'; $('img').hidden = false; showReading(); $('style').value = j.style; $('type').value = j.type; $('src').value = j.source || ''; $('insight').hidden = !insightTxt; $('insight').textContent = insightTxt;
+    $('chat').innerHTML = ''; say('assistant', '이전 작업을 불러왔습니다. 다듬기 요청을 이어서 할 수 있습니다.'); $('draw').disabled = false; $('refine').disabled = false; render($('src').value, false);
+  });
+}
+loadRuns();
+</script>

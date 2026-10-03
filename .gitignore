@@ -1,0 +1,6 @@
+_workspace/
+__pycache__/
+.server.pid
+server.log
+server.err.log
+sample/*.png

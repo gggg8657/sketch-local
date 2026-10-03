@@ -1,0 +1,10 @@
+sketch-local
+============
+
+Bundled third-party software:
+  mermaid 11.17.2 (static/mermaid.min.js) — https://github.com/mermaid-js/mermaid — MIT License.
+  Copied from the sibling package diagram-local (same version).
+
+Style presets reference: Okabe & Ito color universal design palette (Wong, Nature Methods 8:441, 2011) — color values only.
+
+Files authored for this package (MIT): app.py, ui.html, goal-prompt.md, STYLES.md, selftest.py, setup.sh, README.md, sample/*.svg
