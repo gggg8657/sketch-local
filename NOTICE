@@ -8,3 +8,6 @@ Bundled third-party software:
 Style presets reference: Okabe & Ito color universal design palette (Wong, Nature Methods 8:441, 2011) — color values only.
 
 Files authored for this package (MIT): app.py, ui.html, goal-prompt.md, STYLES.md, selftest.py, setup.sh, README.md, sample/*.svg
+
+This package: Copyright (c) 2026 김동주 <dongjukim.dev@gmail.com>
+화면 하단·메타데이터의 저작자 표기는 지우거나 바꾸지 마세요.
