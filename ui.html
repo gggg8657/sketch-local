@@ -5,7 +5,7 @@
 <script src="static/mermaid.min.js"></script>
 <style>
   :root{--bg:#fafaf8;--fg:#1f1f1f;--muted:#777;--line:#ddd;--acc:#2f6fed;--panel:#fff}
-  body{font:15px/1.6 -apple-system,"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:14px;height:100vh;box-sizing:border-box;display:flex;flex-direction:column}
+  body{font:15px/1.6 -apple-system,"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:14px;height:100vh;box-sizing:border-box;display:flex;flex-direction:column;overflow-wrap:anywhere}
   h1{font-size:18px;margin:0 0 8px}h1 small{font-weight:400;color:var(--muted);font-size:13px}
   .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
   select,button,textarea,input[type=text]{font:inherit;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
@@ -13,21 +13,21 @@
   button.mode{padding:8px 12px;text-align:left}button.mode b{display:block}button.mode small{color:var(--muted)}
   #status{color:var(--muted);font-size:13px}
   .main{display:flex;gap:12px;flex:1;min-height:0}
-  .col{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .col{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0;overflow-y:auto}.col>*{flex-shrink:0}
   .c1{width:300px}.c2{width:380px}.c3{flex:1}
   .box{border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:10px;overflow:auto}
   #img{max-width:100%;max-height:260px;display:block;margin:auto}
-  #chat{flex:1;font-size:14px}
+  #chat{flex:1;min-height:120px;font-size:14px}
   .msg{margin:6px 0;padding:8px 10px;border-radius:8px;white-space:pre-wrap}.msg.user{background:#e7efff}.msg.assistant{background:#f1f1ee}
   .msg .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}.msg .q{margin:6px 0}.msg .q input,.msg .q select{width:100%;box-sizing:border-box}
-  #view{flex:1;display:flex;align-items:flex-start;justify-content:center}#view svg{max-width:100%;height:auto}
+  #view{flex:1;min-height:240px;display:flex;align-items:flex-start;justify-content:center}#view svg{max-width:100%;height:auto}
   textarea{resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:12px}
   #elems,#edges{height:110px;width:100%;box-sizing:border-box}#q{height:60px;width:100%;box-sizing:border-box;font-family:inherit;font-size:14px}
   #src{height:140px}#tikz{height:120px}
-  #err{color:#a33;font-size:13px;white-space:pre-wrap}
+  #err{color:#a33;font-size:13px;white-space:pre-wrap;max-height:120px;overflow:auto}
   .lbl{font-size:12px;color:var(--muted)}
-  details{font-size:13px}#runs li{cursor:pointer;list-style:none;padding:2px 0}#runs li:hover{color:var(--acc)}
-  @media (max-width:1000px){.main{flex-direction:column}.c1,.c2{width:auto}}
+  details{font-size:13px}#runs{max-height:30vh;overflow:auto}#runs li{cursor:pointer;list-style:none;padding:2px 0}#runs li:hover{color:var(--acc)}
+  @media (max-width:1000px){body{height:auto;min-height:100vh}.main{flex:none;flex-direction:column}.col{min-height:auto}.c1,.c2{width:auto}#view{min-height:300px}}
 </style>
 
 <h1>sketch local <small>— 손그림 사진 → 읽기 → 대화로 방향 정하기 → 논문/그래픽 스타일 다이어그램 · 로컬 비전+텍스트 LLM</small></h1>
