@@ -425,7 +425,7 @@ def list_runs():
             try:
                 j = json.load(open(p, encoding="utf-8"))
                 out.append({"id": j["id"], "ts": j.get("ts"), "mode": j.get("mode"), "style": j.get("style"), "type": j.get("type"),
-                            "head": (j.get("reading") or {}).get("elements", [{}])[:3] and ", ".join(e.get("label", "") for e in j["reading"]["elements"][:3])})
+                            "head": ", ".join(e.get("label", "") for e in ((j.get("reading") or {}).get("elements") or [])[:3])})  # reading 없이 저장된 것도 목록에
             except Exception:
                 pass
     return out
