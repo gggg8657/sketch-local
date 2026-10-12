@@ -1,16 +1,29 @@
 sketch-local
 ============
 
+이 저장소의 원저작물(코드·UI·프롬프트·문서·도구 설계)은 DongJu Kim(gggg8657)이 작성했다.
+제3자 구성요소는 각자의 라이선스를 따르며 THIRD_PARTY_NOTICES.md 에 적었다.
+제3자 구성요소의 권리는 이 저장소의 라이선스로 바뀌지 않는다.
+
+연구·내부 시험용 프로토타입이다(배포·상업 서비스용 아님).
+
+Copyright (c) 2026 DongJu Kim (gggg8657) <gggg8657@gmail.com> — MIT License (LICENSE)
+
 Bundled third-party software:
-  mermaid 11.17.2 (static/mermaid.min.js) — https://github.com/mermaid-js/mermaid — MIT License.
-  Copied from the sibling package diagram-local (same version).
+  mermaid 11.17.2 (static/mermaid.min.js) — https://github.com/mermaid-js/mermaid — MIT License (licenses/mermaid-LICENSE.txt).
+  Copied from the sibling package diagram-local (same version). The bundle also contains d3 (ISC), DOMPurify
+  (MPL-2.0 OR Apache-2.0, licenses/dompurify-LICENSE.txt) and other MIT/BSD/Apache packages — see THIRD_PARTY_NOTICES.md
 
 Style presets reference: Okabe & Ito color universal design palette (Wong, Nature Methods 8:441, 2011) — color values only.
+상표: 스타일 이름의 IEEE, Nature, Distill 은 각 소유자의 이름·상표이다. 서식 분위기를 가리킬 뿐이며
+  해당 기관의 공식 템플릿이 아니고 제휴·보증 관계도 없다.
 
 Files authored for this package (MIT): app.py, ui.html, goal-prompt.md, STYLES.md, selftest.py, setup.sh, README.md, sample/*.svg
 
 LLM (not bundled): called via an OpenAI-compatible API; default deployment is Ollama (https://github.com/ollama/ollama, MIT)
-  serving Google Gemma (gemma4:31b, https://ai.google.dev/gemma — see Gemma's terms of use).
+  serving Google Gemma 4 (gemma4:31b, Apache-2.0 — https://ai.google.dev/gemma/docs/gemma_4_license).
+  Default vision model qwen2.5vl:3b (Qwen2.5-VL-3B-Instruct) is under the Qwen RESEARCH LICENSE (non-commercial):
+  "Qwen is licensed under the Qwen RESEARCH LICENSE AGREEMENT, Copyright (c) Alibaba Cloud. All Rights Reserved."
+  For commercial use set VISION_MODEL=qwen2.5vl:7b (Apache-2.0) — see issue #1.
 
-This package: Copyright (c) 2026 gggg8657 <dongjukim.dev@gmail.com>
 화면 하단·메타데이터의 저작자 표기는 지우거나 바꾸지 마세요.

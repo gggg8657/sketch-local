@@ -2,6 +2,8 @@
 
 화이트보드·노트에 손으로 그린 다이어그램 사진을 올리면 로컬 비전 모델이 요소와 연결을 읽고, 사람이 확인·수정한 뒤 고른 스타일의 Mermaid 그림과 TikZ 코드로 다시 그립니다.
 
+> ⚠️ 연구·내부 시험용 프로토타입입니다(배포·상업 서비스용 아님). 제3자 구성요소의 라이선스는 THIRD_PARTY_NOTICES.md 를 확인하세요.
+
 ![sketch-local 화면 — ① 원본 업로드 ② 요소·연결 확인 ③ 스타일·유형 ④ 그림 미리보기 ⑤ 소스](docs/img/sketch-ui.png)
 
 ## 무엇을 하나
@@ -76,11 +78,17 @@ python3 app.py --cli sample/sketch1.png --mode 단순화 --style 논문-파스�
 
 - 동봉: [mermaid](https://github.com/mermaid-js/mermaid) 11.17.2 (MIT) — [diagram-local](https://github.com/gggg8657/diagram-local) 과 같은 파일
 - 색 프리셋: Okabe & Ito 색각 친화 팔레트 (Wong, *Nature Methods* 8:441, 2011) — 색 값만 참고
-- **LLM 실행** — OpenAI 호환 API 로 호출합니다(모델 가중치는 동봉하지 않음). 기본 배포는 [Ollama](https://github.com/ollama/ollama) (MIT) 위의 Google [Gemma](https://ai.google.dev/gemma) `gemma4:31b` — 모델 이용 조건은 Gemma 배포처 참고.
+- **비전 모델 기본값 `qwen2.5vl:3b` 는 [Qwen Research License](https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct/blob/main/LICENSE)(비상업)입니다.** 상업 이용 시: `VISION_MODEL=qwen2.5vl:7b` ([Apache-2.0](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct)) 또는 `VISION_MODEL=gemma4:31b` (Apache-2.0) 로 실행하세요 ([#1](https://github.com/gggg8657/sketch-local/issues/1)). 텍스트 기본 pull 모델 `qwen3:8b` 는 Apache-2.0.
+- 스타일 이름의 IEEE·Nature·Distill 은 각 소유자의 이름·상표이며, 서식 분위기를 가리킬 뿐 공식 템플릿·제휴가 아닙니다.
+- **LLM 실행** — OpenAI 호환 API 로 호출합니다(모델 가중치는 동봉하지 않음). 기본 배포는 [Ollama](https://github.com/ollama/ollama) (MIT) 위의 Google [Gemma 4](https://ai.google.dev/gemma) `gemma4:31b` ([Apache-2.0](https://ai.google.dev/gemma/docs/gemma_4_license)).
 - 이 도구는 [agent-page-portal](https://github.com/gggg8657/agent-page-portal) 에 연결해 쓰도록 만들었습니다(단독 실행도 됨).
 
-저작권 표기·전체 목록은 `NOTICE` 를 보세요.
+버전·라이선스·상업 이용 여부 전체 표는 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), 저작권 표기는 `NOTICE` 를 보세요.
 
 ## 라이선스
 
-MIT License — Copyright (c) 2026 gggg8657 (DongJu Kim). `LICENSE` 참고.
+MIT License — Copyright (c) 2026 DongJu Kim (gggg8657). `LICENSE` 참고. 제3자 구성요소는 각자의 라이선스를 따릅니다.
+
+## 만든 사람
+
+DongJu Kim (gggg8657) — 설계·구현

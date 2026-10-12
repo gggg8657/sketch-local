@@ -138,7 +138,7 @@ if [ "$LLM_API" = ollama ]; then
   if ! echo "$TAGS" | grep -q "\"name\":\"$VISION\""; then
     FOUND=$(echo "$TAGS" | "$PY" -c 'import json,sys,re;print(next((m["name"] for m in json.load(sys.stdin)["models"] if re.search(r"vl|vision|llava|minicpm-v",m["name"],re.I)),""))')
     if [ -n "$FOUND" ]; then VISION=$FOUND
-    else skip "비전 모델 없음 → pull $VISION (수 GB)"; ollama pull "$VISION" || die "비전 모델 pull 실패. 폐쇄망이면 VL 모델을 반입해 VISION_MODEL=<이름> 으로 지정하세요."; printf '  %s              ' "$D"; fi
+    else skip "비전 모델 없음 → pull $VISION (수 GB)"; [ "$VISION" = qwen2.5vl:3b ] && printf '  ※ qwen2.5vl:3b 는 Qwen Research License(비상업). 상업 이용 시 VISION_MODEL=qwen2.5vl:7b (Apache-2.0)\n'; ollama pull "$VISION" || die "비전 모델 pull 실패. 폐쇄망이면 VL 모델을 반입해 VISION_MODEL=<이름> 으로 지정하세요."; printf '  %s              ' "$D"; fi
   fi
 fi
 ok "$VISION"
