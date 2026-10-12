@@ -49,6 +49,7 @@ python3 app.py --cli sample/sketch1.png --mode 단순화 --style 논문-파스�
 | `NUM_CTX` | `16384` | Ollama 컨텍스트 |
 | `PORT` | `8774` | |
 | `WORKSPACE` | `./_workspace` | 실행 기록·번들 저장 폴더 (포털이 도구별 데이터 폴더로 지정) |
+| `BIND` | (모든 인터페이스) | 듣는 주소. 포털은 `127.0.0.1` 로 띄워 포털을 거쳐서만 접근 |
 
 ## 흐름
 
@@ -58,6 +59,8 @@ python3 app.py --cli sample/sketch1.png --mode 단순화 --style 논문-파스�
 4. **그리기** — 텍스트 모델이 Mermaid 작성, 서버가 프리셋(frontmatter 테마·classDef)을 붙여 브라우저에서 렌더. 파싱 오류면 LLM 자동 수정 1회. 인사이트 모드는 해설 문단 추가.
 5. **다듬기** — "라벨 영어로", "DB 를 원통으로" 같은 요청으로 반복 수정.
 6. **내보내기** — SVG / PNG / Mermaid 소스 / TikZ(코드만) / 번들 저장(`$WORKSPACE/<id>/` 에 sketch.png·bundle.json·diagram.mmd).
+
+번들(기록)은 사용자별로 따로 저장합니다(포털 접속자 기준, 포털이 넘기는 `X-Agent-User` 헤더 → `$WORKSPACE/u/<사용자>/`). 서버 주인(헤더 없음·`owner`)은 `$WORKSPACE` 그대로라 예전 기록도 보입니다. 스타일·유형 프리셋은 공유.
 
 스타일 8종과 조사 근거는 [STYLES.md](STYLES.md). 유형: 자동·아키텍처·시퀀스·파이프라인·상태도·ER·마인드맵·블록.
 
