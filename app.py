@@ -207,6 +207,27 @@ def models():
         return [m["name"] for m in json.load(r)["models"]]
 
 
+_VCAP = {}
+
+
+def vision_models(names):
+    """Ollama /api/show 의 capabilities 에 'vision' 이 있는 모델. OpenAI 호환 서버는 알 수 없으므로 None."""
+    if LLM_API == "openai":
+        return None
+    out = []
+    for n in names:
+        if n not in _VCAP:
+            try:
+                req = urllib.request.Request(LLM_BASE + "/api/show", data=json.dumps({"model": n}).encode(), headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    _VCAP[n] = "vision" in (json.load(r).get("capabilities") or [])
+            except Exception:
+                return None
+        if _VCAP[n]:
+            out.append(n)
+    return out
+
+
 def prompt(section):
     """goal-prompt.md 의 `## <section>` 본문."""
     txt = GOAL
@@ -479,7 +500,8 @@ class H(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             if self.path == "/api/models":
-                return self._send({"models": models(), "text": MODEL, "vision": VISION})
+                ms = models()
+                return self._send({"models": ms, "text": MODEL, "vision": VISION, "vision_models": vision_models(ms)})
             if self.path == "/api/presets":
                 return self._send({"styles": {k: v["guide"] for k, v in STYLES.items()}, "types": {k: v[1] for k, v in TYPES.items()}})
             if self.path == "/api/runs":

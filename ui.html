@@ -83,7 +83,8 @@ mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });
 fetch('api/models').then(r => r.json()).then(j => {
   const opt = (sel, def) => j.models.map(m => `<option ${m === def ? 'selected' : ''}>${m}</option>`).join('');
   $('model').innerHTML = opt('model', j.text); $('vmodel').innerHTML = opt('vmodel', j.vision);
-  if (!j.models.some(m => /vl|vision|llava|gemma3(?!:1b)|minicpm-v/i.test(m))) $('status').textContent = '주의: 비전 모델이 안 보입니다 (예: ollama pull qwen2.5vl:7b)';
+  const hasVision = j.vision_models ? j.vision_models.length > 0 : j.models.some(m => /vl|vision|llava|gemma[34](?!:1b)|minicpm-v/i.test(m));
+  if (!hasVision) $('status').textContent = '주의: 비전 모델이 안 보입니다 (예: ollama pull qwen2.5vl:7b)';
 }).catch(() => $('status').textContent = 'LLM 서버에 연결할 수 없습니다');
 fetch('api/presets').then(r => r.json()).then(j => {
   $('style').innerHTML = Object.entries(j.styles).map(([k, v]) => `<option value="${k}" title="${v}">${k}</option>`).join('');
