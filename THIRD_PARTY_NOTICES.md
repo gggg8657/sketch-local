@@ -28,15 +28,15 @@
 
 | 이름 | 쓰임 | 라이선스 | 링크 | 상업 이용 | 비고 |
 |---|---|---|---|---|---|
-| Qwen2.5-VL-3B-Instruct (`qwen2.5vl:3b`) | **기본 비전 모델** (`app.py` `VISION_MODEL` 기본값, `setup.sh` 가 없으면 pull) | Qwen RESEARCH LICENSE (비상업) | https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct/blob/main/LICENSE | **비상업** | [#1](https://github.com/gggg8657/sketch-local/issues/1) — `VISION_MODEL=qwen2.5vl:7b` 로 회피 |
-| Qwen2.5-VL-7B-Instruct (`qwen2.5vl:7b`) | 대체 비전 모델 | Apache-2.0 | https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct | 가능 | |
+| Qwen2.5-VL-7B-Instruct (`qwen2.5vl:7b`) | **기본 비전 모델** (`app.py` `VISION_MODEL` 기본값, `setup.sh` 가 서버에 VL 모델이 없으면 pull) | Apache-2.0 | https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct | 가능 | |
+| Qwen2.5-VL-3B-Instruct (`qwen2.5vl:3b`) | 기본값 아님 (2026-10-12 이전 기본값) — 사용자가 `VISION_MODEL=` 로 지정할 때만 | Qwen RESEARCH LICENSE (비상업) | https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct/blob/main/LICENSE | **비상업** | [#1](https://github.com/gggg8657/sketch-local/issues/1) (해결: 기본값 변경) |
 | Qwen3-8B (`qwen3:8b`) | `setup.sh` 기본 pull 텍스트 모델 | Apache-2.0 | https://huggingface.co/Qwen/Qwen3-8B | 가능 | `MODEL=` 로 변경 |
 | Gemma 4 31B (`gemma4:31b`) | 포털 배포 기본 모델(텍스트·비전) | Apache-2.0 | https://ai.google.dev/gemma/docs/gemma_4_license | 가능 | |
 
 ## 확인 필요
 
-- **Qwen2.5-VL-3B (`qwen2.5vl:3b`) — Qwen Research License, 비상업** → [#1](https://github.com/gggg8657/sketch-local/issues/1).
-  상업 이용 시 `VISION_MODEL=qwen2.5vl:7b`(Apache-2.0) 또는 `VISION_MODEL=gemma4:31b`(Apache-2.0)로 실행. 가중치는 저장소에 넣지 않는다.
+없음 (2026-10-12 기준). 이전 기본 비전 모델 `qwen2.5vl:3b`(Qwen Research License, 비상업)는 기본값에서 빼고 `qwen2.5vl:7b`(Apache-2.0)로 바꿨다 → [#1](https://github.com/gggg8657/sketch-local/issues/1).
+`VISION_MODEL=` 로 다른 모델을 지정하거나, `setup.sh` 의 자동 선택이 서버에 이미 있는 VL 모델을 고르면 그 모델의 라이선스를 따로 확인할 것.
 
 ## 이 저장소의 원저작물
 

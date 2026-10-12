@@ -46,7 +46,7 @@ python3 app.py --cli sample/sketch1.png --mode 단순화 --style 논문-파스�
 | `LLM_API` | `ollama` | `ollama` 또는 `openai`(vLLM 등) |
 | `LLM_BASE_URL` | `http://localhost:11434` / `:8000/v1` | 서버 주소 |
 | `LLM_MODEL` | `qwen3:8b` | 텍스트 모델(그리기·다듬기·TikZ). 포털로 띄우면 로컬 Ollama `gemma4:31b` |
-| `VISION_MODEL` | `qwen2.5vl:3b` | 비전 모델(읽기). 서버에선 `qwen2.5vl:32b` 급 권장 |
+| `VISION_MODEL` | `qwen2.5vl:7b` (Apache-2.0) | 비전 모델(읽기). 서버에선 `qwen2.5vl:32b` 급 권장 |
 | `LLM_API_KEY` | (없음) | OpenAI 호환 서버 키 |
 | `NUM_CTX` | `16384` | Ollama 컨텍스트 |
 | `PORT` | `8774` | |
@@ -78,7 +78,7 @@ python3 app.py --cli sample/sketch1.png --mode 단순화 --style 논문-파스�
 
 - 동봉: [mermaid](https://github.com/mermaid-js/mermaid) 11.17.2 (MIT) — [diagram-local](https://github.com/gggg8657/diagram-local) 과 같은 파일
 - 색 프리셋: Okabe & Ito 색각 친화 팔레트 (Wong, *Nature Methods* 8:441, 2011) — 색 값만 참고
-- **비전 모델 기본값 `qwen2.5vl:3b` 는 [Qwen Research License](https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct/blob/main/LICENSE)(비상업)입니다.** 상업 이용 시: `VISION_MODEL=qwen2.5vl:7b` ([Apache-2.0](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct)) 또는 `VISION_MODEL=gemma4:31b` (Apache-2.0) 로 실행하세요 ([#1](https://github.com/gggg8657/sketch-local/issues/1)). 텍스트 기본 pull 모델 `qwen3:8b` 는 Apache-2.0.
+- 비전 모델 기본값은 `qwen2.5vl:7b` ([Apache-2.0](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct)), 포털 배포는 `gemma4:31b` (Apache-2.0). `qwen2.5vl:3b` 는 [Qwen Research License](https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct/blob/main/LICENSE)(비상업)라 기본값에서 뺐습니다 ([#1](https://github.com/gggg8657/sketch-local/issues/1)). `VISION_MODEL=` 로 바꿀 때는 그 모델의 라이선스를 확인하세요. 텍스트 기본 pull 모델 `qwen3:8b` 는 Apache-2.0.
 - 스타일 이름의 IEEE·Nature·Distill 은 각 소유자의 이름·상표이며, 서식 분위기를 가리킬 뿐 공식 템플릿·제휴가 아닙니다.
 - **LLM 실행** — OpenAI 호환 API 로 호출합니다(모델 가중치는 동봉하지 않음). 기본 배포는 [Ollama](https://github.com/ollama/ollama) (MIT) 위의 Google [Gemma 4](https://ai.google.dev/gemma) `gemma4:31b` ([Apache-2.0](https://ai.google.dev/gemma/docs/gemma_4_license)).
 - 이 도구는 [agent-page-portal](https://github.com/gggg8657/agent-page-portal) 에 연결해 쓰도록 만들었습니다(단독 실행도 됨).

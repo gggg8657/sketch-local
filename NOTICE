@@ -22,8 +22,7 @@ Files authored for this package (MIT): app.py, ui.html, goal-prompt.md, STYLES.m
 
 LLM (not bundled): called via an OpenAI-compatible API; default deployment is Ollama (https://github.com/ollama/ollama, MIT)
   serving Google Gemma 4 (gemma4:31b, Apache-2.0 — https://ai.google.dev/gemma/docs/gemma_4_license).
-  Default vision model qwen2.5vl:3b (Qwen2.5-VL-3B-Instruct) is under the Qwen RESEARCH LICENSE (non-commercial):
-  "Qwen is licensed under the Qwen RESEARCH LICENSE AGREEMENT, Copyright (c) Alibaba Cloud. All Rights Reserved."
-  For commercial use set VISION_MODEL=qwen2.5vl:7b (Apache-2.0) — see issue #1.
+  Default vision model: qwen2.5vl:7b (Qwen2.5-VL-7B-Instruct, Apache-2.0). qwen2.5vl:3b (Qwen RESEARCH LICENSE,
+  non-commercial) is no longer the default — see issue #1.
 
 화면 하단·메타데이터의 저작자 표기는 지우거나 바꾸지 마세요.

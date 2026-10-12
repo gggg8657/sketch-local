@@ -25,7 +25,7 @@ WS = os.environ.get("WORKSPACE") or os.path.join(ROOT, "_workspace")  # 포털�
 LLM_API = os.environ.get("LLM_API", "ollama")            # ollama | openai (vLLM·LM Studio 등)
 LLM_BASE = os.environ.get("LLM_BASE_URL", "http://localhost:8000/v1" if LLM_API == "openai" else "http://localhost:11434").rstrip("/")
 MODEL = os.environ.get("LLM_MODEL", "qwen3:8b")           # 텍스트(그리기·TikZ)
-VISION = os.environ.get("VISION_MODEL", "qwen2.5vl:3b")   # 비전(읽기) — 서버에선 더 큰 VL 모델
+VISION = os.environ.get("VISION_MODEL", "qwen2.5vl:7b")   # 비전(읽기, Apache-2.0) — 서버에선 더 큰 VL 모델
 LLM_KEY = os.environ.get("LLM_API_KEY", "")
 PORT = int(os.environ.get("PORT", "8774"))
 NUM_CTX = int(os.environ.get("NUM_CTX", "16384"))

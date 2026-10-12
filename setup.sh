@@ -7,7 +7,7 @@
 # 환경변수로 덮어쓰기:
 #   LLM_BASE_URL=http://gpu:8000/v1 LLM_API=openai   이미 있는 서버를 강제 지정 (탐색 생략)
 #   MODEL=qwen3:32b                                  Ollama에 모델이 없을 때 pull 할 모델 (기본 qwen3:8b)
-#   VISION_MODEL=qwen2.5vl:7b                       비전(읽기) 모델 (기본 qwen2.5vl:3b, 없으면 vl/vision/llava 포함 모델 자동 선택)
+#   VISION_MODEL=qwen2.5vl:7b                       비전(읽기) 모델 (기본 qwen2.5vl:7b·Apache-2.0, 없으면 vl/vision/llava 포함 모델 자동 선택)
 #   PORT=8774
 set -euo pipefail
 
@@ -132,13 +132,13 @@ ok "$MODEL"
 
 # ── 비전 모델 ────────────────────────────────────────────────────────────
 step "비전 모델"
-VISION="${VISION_MODEL:-qwen2.5vl:3b}"
+VISION="${VISION_MODEL:-qwen2.5vl:7b}"
 if [ "$LLM_API" = ollama ]; then
   TAGS=$(curl -fsS "$LLM_BASE_URL/api/tags")
   if ! echo "$TAGS" | grep -q "\"name\":\"$VISION\""; then
     FOUND=$(echo "$TAGS" | "$PY" -c 'import json,sys,re;print(next((m["name"] for m in json.load(sys.stdin)["models"] if re.search(r"vl|vision|llava|minicpm-v",m["name"],re.I)),""))')
     if [ -n "$FOUND" ]; then VISION=$FOUND
-    else skip "비전 모델 없음 → pull $VISION (수 GB)"; [ "$VISION" = qwen2.5vl:3b ] && printf '  ※ qwen2.5vl:3b 는 Qwen Research License(비상업). 상업 이용 시 VISION_MODEL=qwen2.5vl:7b (Apache-2.0)\n'; ollama pull "$VISION" || die "비전 모델 pull 실패. 폐쇄망이면 VL 모델을 반입해 VISION_MODEL=<이름> 으로 지정하세요."; printf '  %s              ' "$D"; fi
+    else skip "비전 모델 없음 → pull $VISION (수 GB)"; case "$VISION" in qwen2.5vl:3b*|qwen2.5vl:72b*) printf '  ※ %s 는 Apache-2.0 이 아님(Qwen 전용 라이선스) — 상업 이용 전 확인\n' "$VISION";; esac; ollama pull "$VISION" || die "비전 모델 pull 실패. 폐쇄망이면 VL 모델을 반입해 VISION_MODEL=<이름> 으로 지정하세요."; printf '  %s              ' "$D"; fi
   fi
 fi
 ok "$VISION"
