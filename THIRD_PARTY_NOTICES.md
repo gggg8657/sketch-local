@@ -40,4 +40,4 @@
 
 ## 이 저장소의 원저작물
 
-`app.py`, `ui.html`, `goal-prompt.md`, `STYLES.md`, `selftest.py`, `setup.sh`, `README.md`, `sample/*.svg` — DongJu Kim (gggg8657), MIT (`LICENSE`).
+`app.py`, `ui.html`, `goal-prompt.md`, `STYLES.md`, `selftest.py`, `setup.sh`, `README.md`, `sample/*.svg` — DongJu Kim (gggg8657), PolyForm Noncommercial 1.0.0 (`LICENSE`).
