@@ -592,4 +592,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--cli":
         sys.exit(cli(sys.argv[2:]))
     print(f"sketch local → http://localhost:{PORT}  (text={MODEL}, vision={VISION}, llm={LLM_API} {LLM_BASE})  {_SIG}")
-    ThreadingHTTPServer((os.environ.get("BIND", ""), PORT), H).serve_forever()
+    ThreadingHTTPServer((os.environ.get("BIND", "127.0.0.1"), PORT), __import__("portal_auth").install(H, "sketch-local")).serve_forever()
