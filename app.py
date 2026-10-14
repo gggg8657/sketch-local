@@ -19,6 +19,7 @@ import sys
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import portal_auth  # 포털 서명 확인 관문·오류 문장 정리(원본 agent-page-portal/sdk/portal_auth.py)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WS = os.environ.get("WORKSPACE") or os.path.join(ROOT, "_workspace")  # 포털이 AGENT_DATA/<도구> 로 모아 줌
@@ -515,11 +516,13 @@ class H(BaseHTTPRequestHandler):
             if self.path == "/static/mermaid.min.js":
                 with open(os.path.join(ROOT, "static", "mermaid.min.js"), "rb") as f:
                     return self._send(f.read(), "application/javascript")
+            if self.path.split("?")[0].startswith("/api/"):   # 없는 API 경로는 화면 대신 JSON 404
+                return self._send({"error": "not found"}, code=404)
             self._send(signed(HTML).encode(), "text/html; charset=utf-8")
         except FileNotFoundError:
             self._send({"error": "없음"}, code=404)
         except Exception as e:
-            self._send({"error": f"{type(e).__name__}: {e}"}, code=500)
+            self._send({"error": portal_auth.scrub(f"{type(e).__name__}: {e}")}, code=500)
 
     def do_POST(self):
         req = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
@@ -541,7 +544,7 @@ class H(BaseHTTPRequestHandler):
             if self.path != "/api/draw":
                 return self._send({"error": "없음"}, code=404)
         except Exception as e:
-            return self._send({"error": f"{type(e).__name__}: {e}"}, code=500)
+            return self._send({"error": portal_auth.scrub(f"{type(e).__name__}: {e}")}, code=500)
         # /api/draw — SSE
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream; charset=utf-8")
@@ -557,7 +560,7 @@ class H(BaseHTTPRequestHandler):
                                 max_nodes=int(req.get("max_nodes") or 8))
             emit({"done": {"source": src, "insight": insight, "sanity": sanity(src)}})
         except Exception as e:
-            emit({"error": f"{type(e).__name__}: {e}"})
+            emit({"error": portal_auth.scrub(f"{type(e).__name__}: {e}")})
 
 
 def cli(argv):
@@ -592,4 +595,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--cli":
         sys.exit(cli(sys.argv[2:]))
     print(f"sketch local → http://localhost:{PORT}  (text={MODEL}, vision={VISION}, llm={LLM_API} {LLM_BASE})  {_SIG}")
-    ThreadingHTTPServer((os.environ.get("BIND", "127.0.0.1"), PORT), __import__("portal_auth").install(H, "sketch-local")).serve_forever()
+    ThreadingHTTPServer((os.environ.get("BIND", "127.0.0.1"), PORT), portal_auth.install(H, "sketch-local")).serve_forever()
