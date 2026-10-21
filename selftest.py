@@ -79,4 +79,41 @@ for s in app.STYLES: app.frontmatter(s)  # 모든 프리셋 YAML 생성
 _src = open(__import__("os").path.join(__import__("os").path.dirname(__import__("os").path.abspath(__file__)), "app.py"), encoding="utf-8").read()
 assert "wqkgMjAyNiBnZ2dnODY1NyDCtyBkb25nanVraW0uZGV2QGdtYWlsLmNvbQ==" in _src and "signed(" in _src and "X-Author" in _src, "저작권 표기 누락"
 
+# 8) 브라우저가 떠나도(첫 토큰 뒤 쓰기가 BrokenPipeError) 그리기는 끝까지 돌고 서버 오류·트레이스백 없음(그리기 결과 저장은 화면의 /api/save 몫)
+import io, sys, tempfile, threading, urllib.request
+from http.server import ThreadingHTTPServer
+class Cut:
+    def __init__(s, f, n): s.f, s.n = f, n
+    def write(s, b):
+        s.n -= 1
+        if s.n < 0: raise BrokenPipeError(32, "Broken pipe")
+        return s.f.write(b)
+    def flush(s): pass
+    def __getattr__(s, k): return getattr(s.f, k)
+class CutH(app.H):
+    def setup(s): super().setup(); s.wfile = Cut(s.wfile, 2)  # 응답 머리 + 첫 이벤트까지만 닿음
+ERRS = []
+class Srv(ThreadingHTTPServer):
+    def handle_error(s, req, addr): ERRS.append(sys.exc_info()[1])
+def cut_post(path, body, user="alice"):
+    srv = Srv(("127.0.0.1", 0), CutH); threading.Thread(target=srv.serve_forever, daemon=True).start()
+    err0, sys.stderr = sys.stderr, io.StringIO()
+    try:
+        r = urllib.request.Request(f"http://127.0.0.1:{srv.server_address[1]}{path}", json.dumps(body).encode(), {"Content-Type": "application/json", "X-Agent-User": user})
+        got = urllib.request.urlopen(r).read().decode()
+    finally:
+        cap, sys.stderr = sys.stderr.getvalue(), err0
+    srv.shutdown(); srv.server_close()
+    assert got.count("data: ") == 1 and not ERRS and "Traceback" not in cap and cap.count("연결 끊김") == 1, (got, ERRS, cap)
+    return got
+DONE = []
+def fake2(system, messages, model, on_token=None, images=None):
+    for part in ("flowchart TB\n", '  n1["a"] --> n2["b"]'):
+        on_token and on_token(part)
+    DONE.append(1)
+    return 'flowchart TB\n  n1["a"] --> n2["b"]'
+app.ollama = fake2
+cut_post("/api/draw", {"reading": r2, "mode": "원본", "style": "IEEE-모노", "type": "아키텍처"})
+assert DONE == [1]
+
 print("selftest OK — 프리셋", len(app.STYLES), "유형", len(app.TYPES))
